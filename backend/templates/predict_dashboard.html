@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Dashboard - URL Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: white; }
+
+        .navbar { background: #1a1f2e; padding: 1rem 0; border-bottom: 1px solid #2d3748; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #10b981; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: #cbd5e0; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background: #2d3748; color: white; }
+        .btn-logout { background: #ef4444; color: white; }
+
+        .dashboard-section { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+        .dashboard-header { text-align: center; margin-bottom: 3rem; }
+        .dashboard-header h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #10b981; }
+        .dashboard-header p { color: #94a3b8; font-size: 1.2rem; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .stat-card { background: #1a1f2e; padding: 1.5rem; border-radius: 10px; border: 1px solid #2d3748; display: flex; align-items: center; gap: 1rem; }
+        .stat-icon { width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .stat-info h3 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .stat-info p { color: #94a3b8; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+        .chart-card { background: #1a1f2e; padding: 1.5rem; border-radius: 10px; border: 1px solid #2d3748; }
+        .chart-card h3 { margin-bottom: 1rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+        .chart-container { height: 300px; }
+
+        .recent-activity { background: #1a1f2e; padding: 1.5rem; border-radius: 10px; border: 1px solid #2d3748; margin-bottom: 2rem; }
+        .recent-activity h3 { margin-bottom: 1rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+        .activity-list { display: flex; flex-direction: column; gap: 1rem; }
+        .activity-item { display: flex; justify-content: between; align-items: center; padding: 1rem; background: #0f1419; border-radius: 5px; border: 1px solid #374151; }
+        .activity-status { padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: bold; }
+        .status-malicious { background: #ef4444; color: white; }
+        .status-benign { background: #10b981; color: white; }
+
+        .feature-analysis { background: #1a1f2e; padding: 1.5rem; border-radius: 10px; border: 1px solid #2d3748; }
+        .feature-analysis h3 { margin-bottom: 1rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .feature-item { background: #0f1419; padding: 1rem; border-radius: 5px; border: 1px solid #374151; }
+        .feature-header { display: flex; justify-content: between; margin-bottom: 0.5rem; }
+        .feature-bar { height: 8px; background: #374151; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem; }
+        .feature-progress { height: 100%; background: #10b981; transition: width 0.3s; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h2>Prediction Dashboard</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/prediction">Prediction</a>
+                <a href="/detection">Detection</a>
+                <a href="/dashboard/predict" class="active">Dashboard</a>
+                <a href="/login" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="dashboard-section">
+        <div class="dashboard-header">
+            <h1><i class="fas fa-tachometer-alt"></i> Prediction Analytics</h1>
+            <p>XGBoost ML Model Performance and Threat Intelligence</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #3498db;">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalPredictions">0</h3>
+                    <p>Total Predictions</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e74c3c;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="maliciousCount">0</h3>
+                    <p>Malicious URLs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #2ecc71;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="safeCount">0</h3>
+                    <p>Safe URLs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #f39c12;">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="accuracyRate">0%</h3>
+                    <p>Model Accuracy</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-pie"></i> Risk Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-bar"></i> Threat Levels</h3>
+                <div class="chart-container">
+                    <canvas id="threatChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <h3><i class="fas fa-history"></i> Recent Predictions</h3>
+            <div class="activity-list" id="recentPredictions">
+                <div class="activity-item">
+                    <div>No predictions yet</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-analysis">
+            <h3><i class="fas fa-cogs"></i> Feature Importance</h3>
+            <div class="features-grid" id="featureImportance">
+                <div class="feature-item">
+                    <div class="feature-header">
+                        <span class="feature-name">Suspicious Keywords</span>
+                        <span class="feature-percentage">92%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <div class="feature-progress" style="width: 92%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard/prediction');
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update stats
+            document.getElementById('totalPredictions').textContent = data.stats.total_predictions;
+            document.getElementById('maliciousCount').textContent = data.stats.malicious_count;
+            document.getElementById('safeCount').textContent = data.stats.safe_count;
+            document.getElementById('accuracyRate').textContent = data.stats.accuracy_rate + '%';
+
+            // Update recent predictions
+            const recentContainer = document.getElementById('recentPredictions');
+            if (data.recent_predictions.length > 0) {
+                recentContainer.innerHTML = data.recent_predictions.map(pred => `
+                    <div class="activity-item">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; margin-bottom: 0.25rem;">${pred.url}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">${new Date(pred.timestamp).toLocaleString()}</div>
+                        </div>
+                        <div class="activity-status ${pred.prediction === 'malicious' ? 'status-malicious' : 'status-benign'}">
+                            ${pred.prediction.toUpperCase()} (${pred.threat_score})
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update feature importance
+            const featureContainer = document.getElementById('featureImportance');
+            featureContainer.innerHTML = data.feature_importance.map(feature => `
+                <div class="feature-item">
+                    <div class="feature-header">
+                        <span class="feature-name">${feature.name}</span>
+                        <span class="feature-percentage">${feature.importance}%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <div class="feature-progress" style="width: ${feature.importance}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Create charts
+            createCharts(data.chart_data);
+        }
+
+        function createCharts(chartData) {
+            // Risk Distribution Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.risk_distribution.labels,
+                    datasets: [{
+                        data: chartData.risk_distribution.data,
+                        backgroundColor: chartData.risk_distribution.colors,
+                        borderWidth: 2,
+                        borderColor: '#1a1f2e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Threat Levels Chart
+            const threatCtx = document.getElementById('threatChart').getContext('2d');
+            new Chart(threatCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Malicious', 'Benign'],
+                    datasets: [{
+                        label: 'URL Count',
+                        data: [
+                            document.getElementById('maliciousCount').textContent,
+                            document.getElementById('safeCount').textContent
+                        ],
+                        backgroundColor: ['#ef4444', '#10b981'],
+                        borderColor: ['#dc2626', '#059669'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
+
+        // Refresh data every 30 seconds
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>

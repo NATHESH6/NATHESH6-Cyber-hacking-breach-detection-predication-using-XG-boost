@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection - URL Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: white; }
+
+        .navbar { background: #1a1f2e; padding: 1rem 0; border-bottom: 1px solid #2d3748; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #ef4444; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: #cbd5e0; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background: #2d3748; color: white; }
+        .btn-logout { background: #ef4444; color: white; }
+
+        .module-section { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .module-header { text-align: center; margin-bottom: 3rem; }
+        .module-header h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #ef4444; }
+        .module-header p { color: #94a3b8; font-size: 1.2rem; }
+
+        .input-card { background: #1a1f2e; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border: 1px solid #2d3748; }
+        .input-card h3 { margin-bottom: 1.5rem; color: #ef4444; display: flex; align-items: center; gap: 10px; }
+
+        .input-group { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .input-group input { flex: 1; padding: 1rem; background: #0f1419; border: 1px solid #374151; border-radius: 5px; color: white; font-size: 1rem; }
+        .btn { padding: 1rem 2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+        .btn-primary { background: #ef4444; color: white; }
+        .btn-primary:hover { background: #dc2626; }
+        .btn-secondary { background: #8b5cf6; color: white; }
+        .btn-secondary:hover { background: #7c3aed; }
+
+        .divider { text-align: center; margin: 2rem 0; position: relative; }
+        .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #374151; }
+        .divider span { background: #1a1f2e; padding: 0 1rem; color: #94a3b8; }
+
+        .batch-input h4 { margin-bottom: 1rem; color: #f59e0b; display: flex; align-items: center; gap: 10px; }
+        .batch-input textarea { width: 100%; height: 150px; padding: 1rem; background: #0f1419; border: 1px solid #374151; border-radius: 5px; color: white; font-family: monospace; resize: vertical; }
+
+        .result-section { display: none; margin-top: 3rem; }
+        .result-section h3 { margin-bottom: 2rem; color: #ef4444; display: flex; align-items: center; gap: 10px; }
+        
+        .result-card { 
+            background: #1a1f2e; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            margin-bottom: 1.5rem; 
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card.safe { 
+            border: 2px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.02) 100%);
+        }
+
+        .result-card.suspicious { 
+            border: 2px solid #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.02) 100%);
+        }
+
+        .result-card.malicious { 
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
+        }
+
+        .result-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #374151;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 2.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .status-badge.safe {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.suspicious {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .status-badge.malicious {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .status-info h4 { 
+            font-size: 1.8rem; 
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .result-card.safe .status-info h4 { color: #10b981; }
+        .result-card.suspicious .status-info h4 { color: #f59e0b; }
+        .result-card.malicious .status-info h4 { color: #ef4444; }
+
+        .status-info p { 
+            color: #94a3b8; 
+            font-size: 0.95rem;
+        }
+
+        .risk-meter { margin-bottom: 1.5rem; }
+        .risk-info { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .meter { height: 10px; background: #374151; border-radius: 5px; overflow: hidden; }
+        .meter-fill { height: 100%; transition: width 0.3s; }
+
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .detail-item { display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 5px; font-size: 0.95rem; }
+        .detail-item label { font-weight: 600; color: #cbd5e0; }
+        .detail-item span { color: #e5e7eb; text-align: right; word-break: break-word; }
+
+        .threat-badge { padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; display: inline-block; }
+        .threat-badge.critical { background: #ef4444; color: white; }
+        .threat-badge.high { background: #f59e0b; color: white; }
+        .threat-badge.medium { background: #eab308; color: black; }
+        .threat-badge.low { background: #10b981; color: white; }
+        .threat-badge.very-low { background: #6b7280; color: white; }
+
+        .loading-container { text-align: center; padding: 3rem; }
+        .loading-spinner { border: 3px solid #374151; border-top: 3px solid #ef4444; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .info-card { background: #1a1f2e; padding: 2rem; border-radius: 10px; border: 1px solid #2d3748; }
+        .info-card h4 { color: #f59e0b; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-card ul { list-style: none; padding-left: 1rem; }
+        .info-card li { margin-bottom: 0.5rem; color: #94a3b8; }
+        .info-card strong { color: #e5e7eb; }
+
+        .url-text { 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.9rem;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .threat-alerts {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+            margin-top: 1.5rem;
+        }
+
+        .threat-alerts strong { color: #e5e7eb; display: block; margin-bottom: 0.5rem; }
+        .threat-alerts ul { list-style-position: inside; color: #d1d5db; }
+        .threat-alerts li { margin-bottom: 0.3rem; }
+
+        .batch-summary { 
+            background: #1a1f2e; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            margin-bottom: 2rem; 
+            border: 1px solid #2d3748;
+        }
+
+        .batch-summary h4 { color: #ef4444; margin-bottom: 1.5rem; font-size: 1.3rem; }
+        .summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .stat { padding: 1rem; background: #0f1419; border-radius: 8px; text-align: center; }
+        .stat-value { display: block; font-size: 1.8rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .stat-label { display: block; color: #94a3b8; font-size: 0.9rem; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <h2>Detection Module</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/choose">Choose</a>
+                <a href="/prediction">Prediction</a>
+                <a href="/detection" class="active">Detection</a>
+                <a href="/dashboard/detect">Dashboard</a>
+                <a href="/login" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="module-section">
+        <div class="container">
+            <div class="module-header">
+                <h1><i class="fas fa-bolt"></i> Real-Time Threat Detection</h1>
+                <p>Instant malicious URL detection and active threat analysis</p>
+            </div>
+
+            <div class="input-card">
+                <h3><i class="fas fa-shield-alt"></i> Detect Threats</h3>
+                <div class="input-group">
+                    <input type="text" id="singleUrlInput" placeholder="Enter URL to detect (e.g., http://malicious-site.com/login)">
+                    <button onclick="detectSingleURL()" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Detect Single URL
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="batch-input">
+                    <h4><i class="fas fa-list"></i> Batch Detection</h4>
+                    <textarea id="batchUrlsInput" placeholder="Enter multiple URLs for detection
+https://google.com
+http://suspicious-login.com
+https://bank-update.secure.com"></textarea>
+                    <button onclick="detectBatchURLs()" class="btn btn-secondary">
+                        <i class="fas fa-rocket"></i> Detect Multiple URLs
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Detection Results</h3>
+                    <button onclick="clearDetectionResults()" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-trash"></i> Clear Results
+                    </button>
+                </div>
+                <div id="resultContainer"></div>
+            </div>
+
+            <div class="info-card">
+                <h4><i class="fas fa-info-circle"></i> How Detection Works</h4>
+                <p>Our real-time detection system identifies active threats:</p>
+                <ul>
+                    <li><strong>Signature Matching:</strong> Known attack patterns and malicious indicators</li>
+                    <li><strong>Behavioral Analysis:</strong> Suspicious URL structures and patterns</li>
+                    <li><strong>Heuristic Rules:</strong> Custom security rules and thresholds</li>
+                    <li><strong>Threat Intelligence:</strong> Real-time threat data analysis</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const DETECTION_API = '/api/detect';
+
+        async function detectSingleURL() {
+            const urlInput = document.getElementById('singleUrlInput');
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a URL to detect!');
+                return;
+            }
+
+            showLoading(resultContainer, 'Scanning URL for real-time threats...');
+            resultSection.style.display = 'block';
+
+            try {
+                const response = await fetch(DETECTION_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) throw new Error('Detection failed');
+                const data = await response.json();
+                
+                // Clear container and check if there's existing batch content
+                if (resultContainer.querySelector('.batch-summary')) {
+                    resultContainer.innerHTML = ''; // Clear batch results before showing single
+                }
+                
+                displayDetectionResult(data, resultContainer);
+                urlInput.value = ''; // Clear input after analysis
+            } catch (error) {
+                showError(resultContainer, error.message);
+            }
+        }
+
+        async function detectBatchURLs() {
+            const batchInput = document.getElementById('batchUrlsInput');
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+
+            const urlsText = batchInput.value.trim();
+            if (!urlsText) {
+                alert('Please enter URLs to detect!');
+                return;
+            }
+
+            const urls = urlsText.split('\n').filter(url => url.trim() !== '');
+            showLoading(resultContainer, `Scanning ${urls.length} URLs for threats...`);
+            resultSection.style.display = 'block';
+
+            try {
+                const results = [];
+                for (const url of urls) {
+                    const response = await fetch(DETECTION_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: url.trim() })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push(data);
+                    }
+                }
+                resultContainer.innerHTML = ''; // Clear before displaying batch
+                displayBatchResults(results, resultContainer);
+            } catch (error) {
+                showError(resultContainer, error.message);
+            }
+        }
+
+        function displayDetectionResult(data, container) {
+            const threatColor = getThreatColor(data.threat_level);
+            const statusClass = data.status;
+            const statusBadgeText = data.status === 'malicious' ? '⚠️' : data.status === 'suspicious' ? '⚡' : '✓';
+
+            const newCard = document.createElement('div');
+            newCard.className = `result-card ${statusClass}`;
+            newCard.innerHTML = `
+                <div class="result-header">
+                    <div class="status-badge ${statusClass}">
+                        ${statusBadgeText}
+                    </div>
+                    <div class="status-info">
+                        <h4>${statusClass === 'malicious' ? '🚨 MALICIOUS' : statusClass === 'suspicious' ? '⚠️ SUSPICIOUS' : '✅ SAFE'}</h4>
+                        <p>${data.threat_level} Threat - Real-Time Detection</p>
+                    </div>
+                </div>
+
+                <div class="risk-meter">
+                    <div class="risk-info">
+                        <span>Malicious Score:</span>
+                        <strong style="color: ${threatColor}">${data.malicious_score}/100</strong>
+                    </div>
+                    <div class="meter">
+                        <div class="meter-fill" style="width: ${data.malicious_score}%; background: ${threatColor};"></div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>URL:</label>
+                        <span class="url-text" title="${data.url}">${data.url.length > 50 ? data.url.substring(0, 50) + '...' : data.url}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Threat Level:</label>
+                        <span><span class="threat-badge ${data.threat_level.toLowerCase()}">${data.threat_level}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>SSL Valid:</label>
+                        <span>${data.ssl_valid ? '✓ Yes' : '⚠️ No'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Domain Age:</label>
+                        <span>${data.whois_age_days > 0 ? data.whois_age_days + ' days' : 'Unknown'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Country:</label>
+                        <span>${data.country}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Breach Risk:</label>
+                        <span style="color: ${threatColor}; font-weight: 600;">${data.breach_percentage}%</span>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Suspicious Tokens:</label>
+                        <span>${data.suspicious_tokens.length > 0 ? data.suspicious_tokens.join(', ') : 'None detected'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Recommendation:</label>
+                        <span style="font-weight: 600; color: #cbd5e0;"><strong>${data.recommendation}</strong></span>
+                    </div>
+                </div>
+
+                ${data.threat_intel.related_alerts && data.threat_intel.related_alerts.length > 0 ? `
+                    <div class="threat-alerts">
+                        <strong>Threat Intelligence Alerts:</strong>
+                        <ul>
+                            ${data.threat_intel.related_alerts.map(alert => `<li>${alert}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+
+            if (container.querySelector('.result-card') === null && container.querySelector('.batch-summary') === null) {
+                container.innerHTML = '';
+            }
+            container.appendChild(newCard);
+        }
+
+        function displayBatchResults(results, container) {
+            let html = `<div class="batch-summary">
+                <h4>📊 Batch Detection Summary</h4>
+                <div class="summary-stats">
+                    <div class="stat" style="border-left: 4px solid #60a5fa;">
+                        <div class="stat-value" style="color: #60a5fa;">${results.length}</div>
+                        <div class="stat-label">Total URLs</div>
+                    </div>
+                    <div class="stat" style="border-left: 4px solid #ef4444;">
+                        <div class="stat-value" style="color: #ef4444;">${results.filter(r => r.status === 'malicious').length}</div>
+                        <div class="stat-label">Malicious</div>
+                    </div>
+                    <div class="stat" style="border-left: 4px solid #f59e0b;">
+                        <div class="stat-value" style="color: #f59e0b;">${results.filter(r => r.status === 'suspicious').length}</div>
+                        <div class="stat-label">Suspicious</div>
+                    </div>
+                    <div class="stat" style="border-left: 4px solid #10b981;">
+                        <div class="stat-value" style="color: #10b981;">${results.filter(r => r.status === 'safe').length}</div>
+                        <div class="stat-label">Safe</div>
+                    </div>
+                </div>
+            </div>`;
+
+            results.forEach(result => {
+                const threatColor = getThreatColor(result.threat_level);
+                const statusClass = result.status;
+                const statusBadgeText = result.status === 'malicious' ? '⚠️' : result.status === 'suspicious' ? '⚡' : '✓';
+
+                html += `
+                    <div class="result-card ${statusClass}">
+                        <div class="result-header">
+                            <div class="status-badge ${statusClass}">
+                                ${statusBadgeText}
+                            </div>
+                            <div class="status-info">
+                                <h4>${result.status === 'malicious' ? '🚨 MALICIOUS' : result.status === 'suspicious' ? '⚠️ SUSPICIOUS' : '✅ SAFE'}</h4>
+                                <p>${result.threat_level} Threat - Score: ${result.malicious_score}/100</p>
+                            </div>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <label>URL:</label>
+                                <span class="url-text" title="${result.url}">${result.url.length > 60 ? result.url.substring(0, 60) + '...' : result.url}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Threat Level:</label>
+                                <span><span class="threat-badge ${result.threat_level.toLowerCase()}">${result.threat_level}</span></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Breach Risk:</label>
+                                <span style="color: ${threatColor}; font-weight: 600;">${result.breach_percentage}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Recommendation:</label>
+                                <span style="font-weight: 600;">${result.recommendation}</span>
+                            </div>
+                        </div>
+
+                        <div class="risk-meter">
+                            <div class="meter">
+                                <div class="meter-fill" style="width: ${result.malicious_score}%; background: ${threatColor};"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getThreatColor(threatLevel) {
+            switch(threatLevel) {
+                case 'Critical': return '#ef4444';
+                case 'High': return '#f59e0b';
+                case 'Medium': return '#eab308';
+                case 'Low': return '#10b981';
+                case 'Very Low': return '#6b7280';
+                default: return '#6b7280';
+            }
+        }
+
+        function showLoading(container, message) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showError(container, message) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem; background: #1a1f2e; border-radius: 10px; border: 2px solid #ef4444;">
+                    <i class="fas fa-exclamation-circle" style="color: #ef4444; font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Detection Failed</h4>
+                    <p style="color: #94a3b8;">${message}</p>
+                </div>
+            `;
+        }
+
+        function clearDetectionResults() {
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            resultSection.style.display = 'none';
+        }
+
+        // Enter key support
+        document.addEventListener('DOMContentLoaded', function() {
+            const singleInput = document.getElementById('singleUrlInput');
+            if (singleInput) {
+                singleInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        detectSingleURL();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

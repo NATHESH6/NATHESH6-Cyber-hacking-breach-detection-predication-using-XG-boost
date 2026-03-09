@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Module - URL Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: white; }
+
+        .navbar { background: #1a1f2e; padding: 1rem 0; border-bottom: 1px solid #2d3748; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #3b82f6; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: #cbd5e0; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover { background: #2d3748; color: white; }
+        .btn-logout { background: #ef4444; color: white; }
+
+        .choose-section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .choose-header { margin-bottom: 4rem; }
+        .choose-header h1 { font-size: 3rem; margin-bottom: 1rem; }
+        .choose-header p { color: #94a3b8; font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
+
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        .module-card { background: #1a1f2e; padding: 3rem 2rem; border-radius: 15px; border: 2px solid transparent; transition: all 0.3s; cursor: pointer; }
+        .module-card:hover { transform: translateY(-5px); border-color: #3b82f6; }
+        .module-card i { font-size: 4rem; margin-bottom: 1.5rem; }
+        .module-card h2 { font-size: 2rem; margin-bottom: 1rem; }
+        .module-card p { color: #94a3b8; margin-bottom: 2rem; }
+        .module-card ul { list-style: none; text-align: left; margin-bottom: 2rem; }
+        .module-card li { margin-bottom: 0.5rem; color: #cbd5e0; }
+        .module-card li i { font-size: 1rem; margin-right: 0.5rem; }
+
+        .btn-module { display: inline-block; padding: 1rem 2rem; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; transition: all 0.3s; }
+        .btn-module:hover { background: #2563eb; }
+
+        .prediction-card { border-color: #10b981; }
+        .prediction-card i { color: #10b981; }
+        .prediction-card .btn-module { background: #10b981; }
+        .prediction-card .btn-module:hover { background: #059669; }
+
+        .detection-card { border-color: #ef4444; }
+        .detection-card i { color: #ef4444; }
+        .detection-card .btn-module { background: #ef4444; }
+        .detection-card .btn-module:hover { background: #dc2626; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h2>URL Security</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/login" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="choose-section">
+        <div class="choose-header">
+            <h1>Choose Security Module</h1>
+            <p>Select the appropriate module based on your security needs</p>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card prediction-card">
+                <i class="fas fa-chart-line"></i>
+                <h2>Prediction Module</h2>
+                <p>AI-powered future threat prediction using Machine Learning</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Future risk assessment</li>
+                    <li><i class="fas fa-check"></i> Probability scoring</li>
+                    <li><i class="fas fa-check"></i> Threat forecasting</li>
+                    <li><i class="fas fa-check"></i> Preventive analytics</li>
+                </ul>
+                <a href="/prediction" class="btn-module">Open Prediction Module</a>
+            </div>
+
+            <div class="module-card detection-card">
+                <i class="fas fa-bolt"></i>
+                <h2>Detection Module</h2>
+                <p>Real-time threat detection and active attack identification</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Real-time analysis</li>
+                    <li><i class="fas fa-check"></i> Active threat detection</li>
+                    <li><i class="fas fa-check"></i> Live monitoring</li>
+                    <li><i class="fas fa-check"></i> Instant alerts</li>
+                </ul>
+                <a href="/detection" class="btn-module">Open Detection Module</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

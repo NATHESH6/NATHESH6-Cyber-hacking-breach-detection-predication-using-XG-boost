@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Security Analyzer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: white; }
+
+        .hero { text-align: center; padding: 8rem 2rem; background: linear-gradient(135deg, #1a1f2e 0%, #0f1419 100%); }
+        .hero h1 { font-size: 3.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.3rem; color: #94a3b8; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+        .btn { display: inline-block; padding: 1rem 2rem; background: #10b981; color: white; text-decoration: none; border-radius: 5px; font-size: 1.1rem; transition: all 0.3s; }
+        .btn:hover { background: #059669; transform: translateY(-2px); }
+
+        .features { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .feature-card { background: #1a1f2e; padding: 2rem; border-radius: 10px; border: 1px solid #2d3748; }
+        .feature-card i { font-size: 2.5rem; margin-bottom: 1rem; }
+        .feature-card h3 { margin-bottom: 1rem; color: #e5e7eb; }
+        .feature-card p { color: #94a3b8; }
+
+        .prediction { color: #10b981; }
+        .detection { color: #ef4444; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <section class="hero">
+        <h1>URL Security Analyzer</h1>
+        <p>Advanced AI-powered URL threat detection and prediction system for comprehensive web security</p>
+        <a href="/login" class="btn">Get Started</a>
+    </section>
+
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-chart-line prediction"></i>
+                <h3>Threat Prediction</h3>
+                <p>AI-powered future risk assessment using Machine Learning to predict potential threats before they become active</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bolt detection"></i>
+                <h3>Real-time Detection</h3>
+                <p>Instant malicious URL detection and active threat analysis with live monitoring and immediate alerts</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-shield-alt" style="color: #3b82f6;"></i>
+                <h3>Comprehensive Security</h3>
+                <p>Advanced threat intelligence, behavioral analysis, and heuristic rules for complete URL security</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

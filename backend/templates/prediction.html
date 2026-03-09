@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction - URL Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1419; color: white; }
+
+        .navbar { background: #1a1f2e; padding: 1rem 0; border-bottom: 1px solid #2d3748; }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #10b981; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: #cbd5e0; text-decoration: none; padding: 0.5rem 1rem; border-radius: 5px; transition: all 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background: #2d3748; color: white; }
+        .btn-logout { background: #ef4444; color: white; }
+
+        .module-section { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .module-header { text-align: center; margin-bottom: 3rem; }
+        .module-header h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #10b981; }
+        .module-header p { color: #94a3b8; font-size: 1.2rem; }
+
+        .input-card { background: #1a1f2e; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border: 1px solid #2d3748; }
+        .input-card h3 { margin-bottom: 1.5rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+
+        .input-group { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .input-group input { flex: 1; padding: 1rem; background: #0f1419; border: 1px solid #374151; border-radius: 5px; color: white; font-size: 1rem; }
+        .btn { padding: 1rem 2rem; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary { background: #3b82f6; color: white; }
+        .btn-secondary:hover { background: #2563eb; }
+
+        .divider { text-align: center; margin: 2rem 0; position: relative; }
+        .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #374151; }
+        .divider span { background: #1a1f2e; padding: 0 1rem; color: #94a3b8; }
+
+        .batch-input h4 { margin-bottom: 1rem; color: #60a5fa; display: flex; align-items: center; gap: 10px; }
+        .batch-input textarea { width: 100%; height: 150px; padding: 1rem; background: #0f1419; border: 1px solid #374151; border-radius: 5px; color: white; font-family: monospace; resize: vertical; }
+
+        .result-section { display: none; margin-top: 3rem; }
+        .result-section h3 { margin-bottom: 2rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+        
+        .result-card { 
+            background: #1a1f2e; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            margin-bottom: 1.5rem; 
+            border: 2px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card.safe { 
+            border: 2px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.02) 100%);
+        }
+
+        .result-card.malicious { 
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
+        }
+
+        .result-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #374151;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 2.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .status-badge.safe {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.malicious {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .status-info h4 { 
+            font-size: 1.8rem; 
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .result-card.safe .status-info h4 { color: #10b981; }
+        .result-card.malicious .status-info h4 { color: #ef4444; }
+
+        .status-info p { 
+            color: #94a3b8; 
+            font-size: 0.95rem;
+        }
+
+        .risk-meter { margin-bottom: 1.5rem; }
+        .risk-info { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .meter { height: 10px; background: #374151; border-radius: 5px; overflow: hidden; }
+        .meter-fill { height: 100%; transition: width 0.3s; }
+
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .detail-item { display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 5px; font-size: 0.95rem; }
+        .detail-item label { font-weight: 600; color: #cbd5e0; }
+        .detail-item span { color: #e5e7eb; text-align: right; word-break: break-word; }
+
+        .explanation { 
+            background: rgba(0, 0, 0, 0.3); 
+            padding: 1rem; 
+            border-radius: 8px; 
+            border-left: 4px solid #60a5fa;
+            color: #d1d5db;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .explanation strong { color: #e5e7eb; }
+
+        .loading-container { text-align: center; padding: 3rem; }
+        .loading-spinner { border: 3px solid #374151; border-top: 3px solid #10b981; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .info-card { background: #1a1f2e; padding: 2rem; border-radius: 10px; border: 1px solid #2d3748; }
+        .info-card h4 { color: #60a5fa; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .info-card ul { list-style: none; padding-left: 1rem; }
+        .info-card li { margin-bottom: 0.5rem; color: #94a3b8; }
+        .info-card strong { color: #e5e7eb; }
+
+        .url-text { 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.9rem;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .batch-summary h4 { color: #10b981; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .summary-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .stat { padding: 1rem; background: #0f1419; border-radius: 8px; text-align: center; }
+        .stat-value { display: block; font-size: 1.8rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .stat-label { display: block; color: #94a3b8; font-size: 0.9rem; }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h2>Prediction Module</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/choose">Choose</a>
+                <a href="/prediction" class="active">Prediction</a>
+                <a href="/detection">Detection</a>
+                <a href="/dashboard/predict">Dashboard</a>
+                <a href="/login" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="module-section">
+        <div class="container">
+            <div class="module-header">
+                <h1><i class="fas fa-chart-line"></i> URL Threat Prediction</h1>
+                <p>AI-powered future risk assessment using Machine Learning</p>
+            </div>
+
+            <div class="input-card">
+                <h3><i class="fas fa-link"></i> Analyze URLs</h3>
+                <div class="input-group">
+                    <input type="text" id="singleUrlInput" placeholder="Enter single URL (e.g., https://example.com)">
+                    <button onclick="analyzeSingleURL()" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Predict Single URL
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="batch-input">
+                    <h4><i class="fas fa-list"></i> Batch Analysis</h4>
+                    <textarea id="batchUrlsInput" placeholder="Enter multiple URLs (one per line)
+https://google.com
+http://suspicious-site.com
+https://bank-login.verify.com"></textarea>
+                    <button onclick="analyzeBatchURLs()" class="btn btn-secondary">
+                        <i class="fas fa-rocket"></i> Predict Multiple URLs
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3><i class="fas fa-chart-bar"></i> Prediction Results</h3>
+                    <button onclick="clearResults()" class="btn btn-secondary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-trash"></i> Clear Results
+                    </button>
+                </div>
+                <div id="resultContainer"></div>
+            </div>
+
+            <div class="info-card">
+                <h4><i class="fas fa-info-circle"></i> How Prediction Works</h4>
+                <p>Our ML model analyzes URL features to predict future threats:</p>
+                <ul>
+                    <li><strong>URL Structure:</strong> Length, special characters, entropy</li>
+                    <li><strong>Content Analysis:</strong> Suspicious keywords and patterns</li>
+                    <li><strong>Security Features:</strong> HTTPS, IP usage, domain characteristics</li>
+                    <li><strong>ML Probability:</strong> Machine Learning algorithm scoring</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const PREDICTION_API = '/api/predict';
+
+        async function analyzeSingleURL() {
+            const urlInput = document.getElementById('singleUrlInput');
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a URL to analyze!');
+                return;
+            }
+
+            showLoading(resultContainer, 'Analyzing URL with Machine Learning...');
+            resultSection.style.display = 'block';
+
+            try {
+                const response = await fetch(PREDICTION_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) throw new Error('Analysis failed');
+                const data = await response.json();
+                
+                // Clear container and check if there's existing content
+                if (resultContainer.querySelector('.batch-summary')) {
+                    resultContainer.innerHTML = ''; // Clear batch results before showing single
+                }
+                
+                displayPredictionResult(data, resultContainer);
+                urlInput.value = ''; // Clear input after analysis
+            } catch (error) {
+                showError(resultContainer, error.message);
+            }
+        }
+
+        async function analyzeBatchURLs() {
+            const batchInput = document.getElementById('batchUrlsInput');
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+
+            const urlsText = batchInput.value.trim();
+            if (!urlsText) {
+                alert('Please enter URLs to analyze!');
+                return;
+            }
+
+            const urls = urlsText.split('\n').filter(url => url.trim() !== '');
+            showLoading(resultContainer, `Analyzing ${urls.length} URLs...`);
+            resultSection.style.display = 'block';
+
+            try {
+                const results = [];
+                for (const url of urls) {
+                    const response = await fetch(PREDICTION_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: url.trim() })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push(data);
+                    }
+                }
+                resultContainer.innerHTML = ''; // Clear before displaying batch
+                displayBatchResults(results, resultContainer);
+            } catch (error) {
+                showError(resultContainer, error.message);
+            }
+        }
+
+        function displayPredictionResult(data, container) {
+            const riskColor = getRiskColor(data.threat_score);
+            const isMalicious = data.prediction === 'malicious';
+            const cardClass = isMalicious ? 'malicious' : 'safe';
+            const statusBadgeText = isMalicious ? '⚠️' : '✓';
+
+            const newCard = document.createElement('div');
+            newCard.className = `result-card ${cardClass}`;
+            newCard.innerHTML = `
+                <div class="result-header">
+                    <div class="status-badge ${cardClass}">
+                        ${statusBadgeText}
+                    </div>
+                    <div class="status-info">
+                        <h4>${isMalicious ? '🚨 MALICIOUS' : '✅ SAFE'}</h4>
+                        <p>${data.threshold_label} - Machine Learning Prediction</p>
+                    </div>
+                </div>
+
+                <div class="risk-meter">
+                    <div class="risk-info">
+                        <span>Threat Score:</span>
+                        <strong style="color: ${riskColor}">${data.threat_score}/100</strong>
+                    </div>
+                    <div class="meter">
+                        <div class="meter-fill" style="width: ${data.threat_score}%; background: ${riskColor};"></div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>URL:</label>
+                        <span class="url-text" title="${data.url}">${data.url.length > 50 ? data.url.substring(0, 50) + '...' : data.url}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Probability:</label>
+                        <span>${(data.probability * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Suspicious Tokens:</label>
+                        <span>${data.suspicious_tokens.length > 0 ? data.suspicious_tokens.join(', ') : 'None detected'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>IP in URL:</label>
+                        <span>${data.ip_in_url ? '⚠️ Yes' : '✓ No'}</span>
+                    </div>
+                </div>
+
+                <div class="explanation">
+                    <strong>Analysis:</strong> ${data.explanation}
+                </div>
+            `;
+
+            if (container.querySelector('.result-card') === null && container.querySelector('.batch-summary') === null) {
+                container.innerHTML = '';
+            }
+            container.appendChild(newCard);
+        }
+
+        function displayBatchResults(results, container) {
+            let html = `<div class="batch-summary" style="background: #1a1f2e; padding: 2rem; border-radius: 10px; margin-bottom: 2rem; border: 1px solid #2d3748;">
+                <h4 style="color: #10b981; margin-bottom: 1.5rem; font-size: 1.3rem;">📊 Batch Analysis Summary</h4>
+                <div class="summary-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div class="stat" style="background: #0f1419; padding: 1rem; border-radius: 8px; text-align: center; border-left: 4px solid #60a5fa;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #60a5fa;">${results.length}</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Total URLs</div>
+                    </div>
+                    <div class="stat" style="background: #0f1419; padding: 1rem; border-radius: 8px; text-align: center; border-left: 4px solid #ef4444;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #ef4444;">${results.filter(r => r.prediction === 'malicious').length}</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Malicious</div>
+                    </div>
+                    <div class="stat" style="background: #0f1419; padding: 1rem; border-radius: 8px; text-align: center; border-left: 4px solid #10b981;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #10b981;">${results.filter(r => r.prediction === 'benign').length}</div>
+                        <div style="color: #94a3b8; font-size: 0.9rem;">Safe</div>
+                    </div>
+                </div>
+            </div>`;
+
+            results.forEach(result => {
+                const riskColor = getRiskColor(result.threat_score);
+                const isMalicious = result.prediction === 'malicious';
+                const cardClass = isMalicious ? 'malicious' : 'safe';
+                const statusBadgeText = isMalicious ? '⚠️' : '✓';
+
+                html += `
+                    <div class="result-card ${cardClass}">
+                        <div class="result-header">
+                            <div class="status-badge ${cardClass}">
+                                ${statusBadgeText}
+                            </div>
+                            <div class="status-info">
+                                <h4>${isMalicious ? '🚨 MALICIOUS' : '✅ SAFE'}</h4>
+                                <p>${result.threshold_label} - Threat Score: ${result.threat_score}/100</p>
+                            </div>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <label>URL:</label>
+                                <span class="url-text" title="${result.url}">${result.url.length > 60 ? result.url.substring(0, 60) + '...' : result.url}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Probability:</label>
+                                <span>${(result.probability * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Suspicious Tokens:</label>
+                                <span>${result.suspicious_tokens.length}</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Risk Level:</label>
+                                <span style="color: ${riskColor}; font-weight: 600;">
+                                    ${result.threat_score >= 80 ? 'Critical' : result.threat_score >= 60 ? 'High' : result.threat_score >= 40 ? 'Medium' : 'Low'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="risk-meter">
+                            <div class="meter">
+                                <div class="meter-fill" style="width: ${result.threat_score}%; background: ${riskColor};"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getRiskColor(score) {
+            if (score >= 80) return '#ef4444';
+            if (score >= 60) return '#f59e0b';
+            if (score >= 40) return '#eab308';
+            return '#10b981';
+        }
+
+        function clearResults() {
+            const resultSection = document.getElementById('resultSection');
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            resultSection.style.display = 'none';
+        }
+
+        function showLoading(container, message) {
+            container.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showError(container, message) {
+            container.innerHTML = `
+                <div class="error-container">
+                    <i class="fas fa-exclamation-circle" style="color: #ef4444; font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h4>Analysis Failed</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Enter key support
+        document.getElementById('singleUrlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') analyzeSingleURL();
+        });
+    </script>
+</body>
+</html>
