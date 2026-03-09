@@ -84,3 +84,28 @@ The system consists of multiple modules:
    - JSON API responses
 
    - Dashboard visualization
+## Technologies Used
+
+#### Programming Languages
+
+   - Python
+
+   - JavaScript
+
+   - HTML
+
+   - CSS
+
+#### Libraries & Frameworks
+
+   - Scikit-learn
+
+   - XGBoost
+
+   - Pandas
+
+   - NumPy
+
+   - Flask
+
+   - Joblib
