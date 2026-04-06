@@ -49,8 +49,7 @@ The repository is organized as follows:
 ### Prerequisites
 Ensure you have the following installed:
 1. Python (3.8 or newer)
-2. Node.js/npm (for frontend dependencies)
-3. Git (to clone the repository)
+2. Git (to clone the repository)
 
 ### Steps
 1. Clone the repository:
