@@ -87,7 +87,7 @@ pytest tests/
 ---
 
 ## License
-This project is licensed under The Coimbatore Institute of Engineering and Technology (CIET) License. See the `LICENSE` file for details.
+This project is licensed under The Coimbatore Institute of Engineering and Technology (CIET) License. 
 
 ---
 
